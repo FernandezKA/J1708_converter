@@ -6,14 +6,14 @@
 //Function definition
 static void SysInit(void);
 //Main section
+uint8_t RxBuf;
 void main(void)
 {
 	SysInit();
 	for(;;){
-        for(int j = 0; j < 0xFF; ++j){
-    uart_send(j);
-    for(uint16_t i = 0; i < 0xFFFF; ++i) {asm("nop");}
-    }
+          if(test_status(receive_buffer_full) == receive_buffer_full){
+            uart_read(&RxBuf);
+          }  
         }
 }
 //Function declaration
@@ -21,7 +21,9 @@ static void SysInit(void){
   CLK_Config();
   GPIO_Config();
   uart_init();
-  enIRQ;
+  uart_receive_enable;
+  enable_cc_interrupt;
+  enableInterrupts();	
 }
 //Assert failed for SPL 
 #ifdef USE_FULL_ASSERT

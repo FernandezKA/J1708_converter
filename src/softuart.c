@@ -169,7 +169,8 @@ case DATA_LENGTH:		if(Tx_bit9) set_Tx;
 				++Tx_bit;				// next bit to transmit			
 		};
 	};
-        ((Tx_phase == TRUE) ? (Tx_phase = FALSE) : (Tx_phase = TRUE));
+        Tx_phase = ~Tx_phase;
+        //((Tx_phase == TRUE) ? (Tx_phase = FALSE) : (Tx_phase = TRUE));
 	//Tx_phase= ~Tx_phase;
 }
 #endif
@@ -280,7 +281,8 @@ u8 uart_read(u8 *b) {
 						++Rx_bit;			// init next data bit receive
 				}
 			}
-                        ((Rx_phase == TRUE) ? (Rx_phase = FALSE) : (Rx_phase = TRUE));
+                        Rx_phase = ~ Rx_phase;
+                        //((Rx_phase == TRUE) ? (Rx_phase = FALSE) : (Rx_phase = TRUE));
                         /*if(Rx_phase){
                           Rx_phase = FALSE;
                         }
