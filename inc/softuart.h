@@ -2,8 +2,6 @@
 #define _softuart_h_
 
 #include "stm8s.h"
-#include "stm8s_gpio.h"
-#include "stm8s_tim2.h"
 /**
   ******************************************************************************
   * @file swuart.h
