@@ -16,3 +16,10 @@ void GPIO_Config(void){
   GPIOB->CR1|=(1<<5);
   GPIOD->CR1|=(1<<4);
 }
+//This function init hardware uart
+void UART_Config(void){
+  CLK->PCKENR1 |= CLK_PCKENR1_UART1; //ENABLE CLOCKING
+  UART1->BRR1 = 0x68;
+  UART1->BRR2 = 0x02;
+  UART1->CR2 |= UART1_CR2_REN | UART1_CR2_TEN;
+}
