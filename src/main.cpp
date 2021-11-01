@@ -1,16 +1,26 @@
 #include "stm8s.h"
-static void CLK_INIT(void){
-  CLK->CKDIVR = 0x00;
-}
-static void GPIO_INIT(void){
-  GPIOD->DDR|=(1<<4);
-  GPIOD->CR1|=(1<<4);
-}
+#include "init.h"
+//Function definitions
+static void SysInit();
+//Main section
 int main()
 {     
-  CLK_INIT();
-  GPIO_INIT();
+  SysInit();
   for(;;){
     GPIOD->ODR^=(1<<4);
   }
 }
+//Function declaration
+//This function config all of periph MCU
+static void SysInit(){
+  CLK_Init();
+  GPIO_Init();
+  uart_init();
+}
+//Assert params for SPL library
+#ifdef USE_FULL_ASSERT
+void assert_failed(u8 *file, u32 line)
+{
+  return;
+}
+#endif
