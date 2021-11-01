@@ -1,27 +1,32 @@
 #include "stm8s_conf.h"
-/**
-  *inc->stm8s_conf.h - раскоментировать строчки с нужными хедерами 
-  *периферии и необходимыми обработчиками прерываний. Все закоментированные
-  *обработчики ведут на бесконечные циклы.
-  * 
-  *Project->Options->General Options - выбрать мк
-  *
-  *Project->Options->Debugger - выбрать отладчик
-  *
-  *Project->Options->C/C++ Compiler->Preprocessor->Defined symbols  - задать
-  *семейство процессора(перечислены в lib->SPL->inc->stm8s.h), а также задать
-  *частоты внутренних и внешних генераторов(если не задать, то будут ипользованы
-  *значения по умолчанию из stm8s.h).
-  */
-
-int SystemInit(void)
-{
-    return 0;
-}
-
+#include "init.h"
+#include "softuart.h"
+#define enIRQ asm("rim")
+#define disIRQ asm("sim")
+//Function definition
+static void SysInit(void);
+//Main section
 void main(void)
 {
-	SystemInit();
-	while (1){};
+	SysInit();
+	for(;;){
+        for(int j = 0; j < 0xFF; ++j){
+    uart_send(j);
+    for(uint16_t i = 0; i < 0xFFFF; ++i) {asm("nop");}
+    }
+        }
 }
-
+//Function declaration
+static void SysInit(void){
+  CLK_Config();
+  GPIO_Config();
+  uart_init();
+  enIRQ;
+}
+//Assert failed for SPL 
+#ifdef USE_FULL_ASSERT
+void assert_failed(u8 *file, u32 line)
+{
+  return;
+}
+#endif

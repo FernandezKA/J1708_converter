@@ -1,5 +1,6 @@
 #include "stm8s_conf.h"
 #include "stm8s_it.h"
+#include "softuart.h"
 
 #ifndef TRAP_IRQ
 //TRAP Interrupt routine
@@ -140,7 +141,10 @@ INTERRUPT_HANDLER(TIM5_UPD_OVF_BRK_TRG_IRQHandler, 13)
 //Timer5 Capture/Compare Interrupt routine.
 INTERRUPT_HANDLER(TIM5_CAP_COM_IRQHandler, 14)
 {
-	while (1){};
+  #ifdef SWUART_RECEIVE_USED
+    uart_Rx_timing();
+  #endif
+    return;
 }
 #endif
 #else /* (STM8S208) || (STM8S207) || (STM8S105) || (STM8S103) || (STM8AF62Ax) || (STM8AF52Ax) || (STM8AF626x) */
@@ -148,7 +152,7 @@ INTERRUPT_HANDLER(TIM5_CAP_COM_IRQHandler, 14)
 //Timer2 Update/Overflow/Break Interrupt routine.
 INTERRUPT_HANDLER(TIM2_UPD_OVF_BRK_IRQHandler, 13)
 {
-	while (1){};
+  uart_Tx_timing();
 }
 #endif
 
