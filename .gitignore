@@ -1,0 +1,7 @@
+$ cat .gitignore
+*.ewp
+*.dep
+*.ewd
+*.ewt
+/Debug
+/settings
