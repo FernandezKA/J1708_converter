@@ -6,7 +6,25 @@ enum BUS_STATE{
   transmit, 
   collision, 
   wait_time
-} bus_state;
+};
+extern enum BUS_STATE bus_state;
+
+
+enum Receive_FSM{
+  MID = 0, 
+  DATA, 
+  CRC
+};
+extern enum Receive_FSM R_FSM;
+
+
+enum TSTATE{
+  wait = 0, 
+  stop_package,
+  free_bus
+};
+extern enum TSTATE tState;
+extern uint16_t ui16cTime;
 //Struct for j1708 packet
 struct J1708{
   volatile uint8_t MID;
@@ -14,6 +32,16 @@ struct J1708{
   volatile uint8_t CRC;
 };
 typedef struct J1708 j1708;
+//User variables
+extern volatile j1708 jReceiveStr;
+extern volatile j1708 jTransmitStr;
+//User function definition
 //This function for receieve data from j1708 bus
-
+j1708 jReceive(enum Receive_FSM *eFSM);
+//This function for transmit data from j1708 bus
+void jTransmit(j1708 tStruct);
+//This function is IRQ handler for Tim1 
+void Tim1_Handler(enum TSTATE* cState, uint16_t* cTime);
+//This function is IRQ handler for UART1
+void UART1_Handler(uint8_t* u8Buff);
 #endif

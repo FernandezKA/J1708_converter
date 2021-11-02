@@ -31,7 +31,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm8s.h"
-
+#include "j1708.h"
 /* Uncomment the line below to enable peripheral header file inclusion */
 #if defined(STM8S105) || defined(STM8S005) || defined(STM8S103) || defined(STM8S003) ||\
     defined(STM8S903) || defined (STM8AF626x) || defined (STM8AF622x)
