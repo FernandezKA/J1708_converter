@@ -44,4 +44,3 @@ void jTransmit(j1708 tStruct){
       *cState = free_bus;
     }
   }
-//IRQ
