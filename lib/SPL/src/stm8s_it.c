@@ -116,7 +116,9 @@ INTERRUPT_HANDLER(SPI_IRQHandler, 10)
 //Timer1 Update/Overflow/Trigger/Break Interrupt routine.
 INTERRUPT_HANDLER(TIM1_UPD_OVF_TRG_BRK_IRQHandler, 11)
 {
-	while (1){};
+      TIM1->SR1&=~TIM1_SR1_UIF;
+      GPIOB->ODR^=(1<<5);
+        asm("nop");
 }
 #endif
 

@@ -13,6 +13,7 @@ void main(void)
 	for(;;){
           if(test_status(receive_buffer_full) == receive_buffer_full){
             uart_read(&RxBuf);
+            UART1->DR = RxBuf;
           }  
         }
 }
@@ -20,6 +21,8 @@ void main(void)
 static void SysInit(void){
   CLK_Config();
   GPIO_Config();
+  UART_Config();
+  Tim1_Config();
   uart_init();
   uart_receive_enable;
   enable_cc_interrupt;
