@@ -24,7 +24,7 @@ enum TSTATE{
   free_bus
 };
 extern enum TSTATE tState;
-extern uint16_t ui16cTime;
+extern uint16_t u16cTime;
 //Struct for j1708 packet
 struct J1708{
   volatile uint8_t MID;
@@ -43,5 +43,5 @@ void jTransmit(j1708 tStruct);
 //This function is IRQ handler for Tim1 
 void Tim1_Handler(enum TSTATE* cState, uint16_t* cTime);
 //This function is IRQ handler for UART1
-void UART1_Handler(uint8_t* u8Buff);
+void UART1_Rx_Handler(uint16_t* cTime, enum TSTATE* cState,enum Receive_FSM* R_FSM,volatile j1708* RPack);
 #endif

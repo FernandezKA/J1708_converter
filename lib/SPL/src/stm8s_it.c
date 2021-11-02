@@ -117,8 +117,7 @@ INTERRUPT_HANDLER(SPI_IRQHandler, 10)
 INTERRUPT_HANDLER(TIM1_UPD_OVF_TRG_BRK_IRQHandler, 11)
 {
       TIM1->SR1&=~TIM1_SR1_UIF;
-      GPIOB->ODR^=(1<<5);
-        asm("nop");
+      Tim1_Handler(&tState, &u16cTime);
 }
 #endif
 
@@ -201,7 +200,7 @@ INTERRUPT_HANDLER(UART1_TX_IRQHandler, 17)
 //UART1 RX Interrupt routine.
 INTERRUPT_HANDLER(UART1_RX_IRQHandler, 18)
 {
-	while (1){};
+    UART1_Rx_Handler(&u16cTime, &tState, &R_FSM, &jReceiveStr);
 }
 #endif
 #endif /* (STM8S208) || (STM8S207) || (STM8S103) || (STM8S903) || (STM8AF62Ax) || (STM8AF52Ax) */
