@@ -28,9 +28,7 @@ j1708 jReceive(enum Receive_FSM* eFSM){
   return rStruct;
 }
 //j1708 transmit packet
-bool jTransmit(volatile j1708* tStruct){
-  bool isSuccess = FALSE;
-  if(tState == free_bus){
+void jTransmit(volatile j1708* tStruct){
     uint8_t u8PackCnt = 0x00;
     while(u8PackCnt < 0x17U){
       while((UART1->SR & UART1_SR_TXE) != UART1_SR_TXE){asm("nop");}//Wait empty buffer
@@ -45,12 +43,10 @@ bool jTransmit(volatile j1708* tStruct){
       }
            ++u8PackCnt;
     }
-    isSuccess = TRUE;
-  }
-  else{
-    isSuccess = FALSE;
-  }
-  return isSuccess;
+    while((UART1->SR & UART1_SR_TXE) != UART1_SR_TXE){asm("nop");}
+    tState = wait;
+    u16cTime = 0x00;
+    GPIOB->ODR|=(1<<5);
 }
 //IRQ Handler for TIM1
   void Tim1_Handler(enum TSTATE* cState, uint16_t* cTime){
@@ -65,6 +61,7 @@ bool jTransmit(volatile j1708* tStruct){
     }
     else if((*cTime) > 10U){
       *cState = free_bus;
+      GPIOB->ODR&=~(1<<5);
     }
   }
 //IRQ UART

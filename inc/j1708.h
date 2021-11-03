@@ -39,7 +39,7 @@ extern volatile j1708 jTransmitStr;
 //This function for receieve data from j1708 bus
 j1708 jReceive(enum Receive_FSM *eFSM);
 //This function for transmit data from j1708 bus
-bool jTransmit(volatile j1708* tStruct);
+void jTransmit(volatile j1708* tStruct);
 //This function is IRQ handler for Tim1 
 void Tim1_Handler(enum TSTATE* cState, uint16_t* cTime);
 //This function is IRQ handler for UART1
