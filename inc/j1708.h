@@ -35,11 +35,12 @@ typedef struct J1708 j1708;
 //User variables
 extern volatile j1708 jReceiveStr;
 extern volatile j1708 jTransmitStr;
+extern volatile uint8_t u8TimePrior;
 //User function definition
 //This function for receieve data from j1708 bus
 j1708 jReceive(enum Receive_FSM *eFSM);
 //This function for transmit data from j1708 bus
-void jTransmit(volatile j1708* tStruct);
+void jTransmit(volatile j1708* tStruct, uint8_t u8Priority);
 //This function is IRQ handler for Tim1 
 void Tim1_Handler(enum TSTATE* cState, uint16_t* cTime);
 //This function is IRQ handler for UART1

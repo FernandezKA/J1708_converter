@@ -2,6 +2,7 @@
 //User variables
 volatile j1708 jReceiveStr;
 volatile j1708 jTransmitStr;
+volatile uint8_t u8TimePrior = 0x20;
 enum BUS_STATE bus_state;
 enum TSTATE tState;
 uint16_t u16cTime;
@@ -28,7 +29,8 @@ j1708 jReceive(enum Receive_FSM* eFSM){
   return rStruct;
 }
 //j1708 transmit packet
-void jTransmit(volatile j1708* tStruct){
+void jTransmit(volatile j1708* tStruct, uint8_t u8Priority){
+    u8TimePrior = 8 + 2*u8Priority;
     uint8_t u8PackCnt = 0x00;
     while(u8PackCnt < 0x17U){
       while((UART1->SR & UART1_SR_TXE) != UART1_SR_TXE){asm("nop");}//Wait empty buffer
@@ -46,7 +48,7 @@ void jTransmit(volatile j1708* tStruct){
     while((UART1->SR & UART1_SR_TXE) != UART1_SR_TXE){asm("nop");}
     tState = wait;
     u16cTime = 0x00;
-    GPIOB->ODR|=(1<<5);
+    //GPIOB->ODR|=(1<<5);
 }
 //IRQ Handler for TIM1
   void Tim1_Handler(enum TSTATE* cState, uint16_t* cTime){
@@ -59,9 +61,9 @@ void jTransmit(volatile j1708* tStruct){
     if(*cTime > 2U && *cTime < 10){
       *cState = stop_package;
     }
-    else if((*cTime) > 10U){
+    else if((*cTime) > u8TimePrior){
       *cState = free_bus;
-      GPIOB->ODR&=~(1<<5);
+      //GPIOB->ODR&=~(1<<5);
     }
   }
 //IRQ UART

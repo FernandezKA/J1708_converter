@@ -17,7 +17,7 @@ void main(void)
         jTransmitStr.CRC = 0xFFU;
 	for(;;){
           if(tState == free_bus){
-            jTransmit(&jTransmitStr);
+            jTransmit(&jTransmitStr, 1);
             //GPIOB->ODR|=(1<<5);
           }
           else{
