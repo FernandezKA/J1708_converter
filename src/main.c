@@ -11,6 +11,13 @@ void main(void)
 {
 	SysInit();
 	for(;;){
+          jTransmitStr.MID = 0x55U;
+          for(uint8_t i = 0; i < 21; ++i){
+            jTransmitStr.data[i] = i;
+          }
+          jTransmitStr.CRC = 0xFFU;
+          while(!jTransmit(&jTransmitStr));
+          for(uint16_t i = 0; i < 0xFFFF; ++i){asm("nop");}
           if(test_status(receive_buffer_full) == receive_buffer_full){
             uart_read(&RxBuf);
             UART1->DR = RxBuf;
