@@ -200,6 +200,7 @@ INTERRUPT_HANDLER(UART1_TX_IRQHandler, 17)
 //UART1 RX Interrupt routine.
 INTERRUPT_HANDLER(UART1_RX_IRQHandler, 18)
 {
+    UART1->SR&=~UART1_SR_RXNE;
     UART1_Rx_Handler(&u16cTime, &tState, &R_FSM, &jReceiveStr);
 }
 #endif
