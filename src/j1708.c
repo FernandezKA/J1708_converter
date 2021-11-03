@@ -32,9 +32,8 @@ bool jTransmit(volatile j1708* tStruct){
   bool isSuccess = FALSE;
   if(tState == free_bus){
     uint8_t u8PackCnt = 0x00;
-    while(u8PackCnt < 0x18U){
+    while(u8PackCnt < 0x17U){
       while((UART1->SR & UART1_SR_TXE) != UART1_SR_TXE){asm("nop");}//Wait empty buffer
-      
       if(u8PackCnt == 0x00){//MID
         UART1->DR = tStruct->MID;
       }
@@ -42,9 +41,9 @@ bool jTransmit(volatile j1708* tStruct){
         UART1->DR = tStruct ->CRC;
       }
       else{//Data
-        UART1->DR = tStruct->data[u8PackCnt - 0x02];
+        UART1->DR = tStruct->data[u8PackCnt - 0x01];
       }
-      ++u8PackCnt;
+           ++u8PackCnt;
     }
     isSuccess = TRUE;
   }
