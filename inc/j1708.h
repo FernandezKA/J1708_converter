@@ -10,7 +10,7 @@ enum BUS_STATE{
 extern enum BUS_STATE bus_state;
 
 
-enum Receive_FSM{
+enum  Receive_FSM{
   MID = 0, 
   DATA, 
   CRC

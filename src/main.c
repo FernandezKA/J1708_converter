@@ -1,6 +1,8 @@
 #include "stm8s_conf.h"
 #include "init.h"
 #include "softuart.h"
+#include "fifo.h"
+//User defines
 #define enIRQ asm("rim")
 #define disIRQ asm("sim")
 //Function definition
