@@ -30,6 +30,7 @@ struct J1708{
   volatile uint8_t MID;
   volatile uint8_t data[21U];
   volatile uint8_t CRC;
+  volatile uint8_t length;
 };
 typedef struct J1708 j1708;
 //User variables

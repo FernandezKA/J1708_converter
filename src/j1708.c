@@ -32,12 +32,12 @@ j1708 jReceive(enum Receive_FSM* eFSM){
 void jTransmit(volatile j1708* tStruct, uint8_t u8Priority){
     u8TimePrior = 8 + 2*u8Priority;
     uint8_t u8PackCnt = 0x00;
-    while(u8PackCnt < 0x17U){
+    while(u8PackCnt < tStruct->length){
       while((UART1->SR & UART1_SR_TXE) != UART1_SR_TXE){asm("nop");}//Wait empty buffer
       if(u8PackCnt == 0x00){//MID
         UART1->DR = tStruct->MID;
       }
-      else if(u8PackCnt == 0x17U){//CRC
+      else if(u8PackCnt == tStruct->length){//CRC
         UART1->DR = tStruct ->CRC;
       }
       else{//Data

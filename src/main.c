@@ -15,6 +15,7 @@ void main(void)
             jTransmitStr.data[i] = i;
         }
         jTransmitStr.CRC = 0xFFU;
+        jTransmitStr.length = 0x17U;
 	for(;;){
           if(tState == free_bus){
             jTransmit(&jTransmitStr, 1);
