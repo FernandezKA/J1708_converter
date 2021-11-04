@@ -9,9 +9,18 @@
 static void SysInit(void);
 //Main section
 uint8_t RxBuf;
+enum MAIN_FSM{
+  wait_mid, 
+  wait_size, 
+  wait_data, 
+  wait_crc
+};
+static enum MAIN_FSM main_fsm = wait_mid;
+static struct FIFO_STR swUART;
 void main(void)
 {
 	SysInit();
+        swUART.isEmpty = TRUE;
         jTransmitStr.MID = 0x55U;
         for(uint8_t i = 0; i < 21; ++i){
             jTransmitStr.data[i] = i;
@@ -25,11 +34,44 @@ void main(void)
               jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
             }
           }
-//          if(tState == /*stop_package*/free_bus){//After timeout begin parse received data
-//            if(!j1708FIFO.isEmpty){//If new data recieve from UART1, parse it
-//              jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
-//            } 
-//          }
+          if(test_status(receive_buffer_full) == receive_buffer_full){//Receive data from software UART
+            uart_read(&RxBuf);
+            Push(&swUART, RxBuf);
+          }
+          static uint8_t u8CountData = 0x00;
+          if(!swUART.isEmpty){
+            switch(main_fsm){
+            case wait_mid:
+              jTransmitStr.MID = Pull(&swUART);
+              main_fsm = wait_size;
+              break;
+              
+            case wait_size:
+              jTransmitStr.length = Pull(&swUART);
+              main_fsm = wait_data;
+              break;
+              
+            case wait_data:
+              if(u8CountData < jTransmitStr.length){
+                jTransmitStr.data[u8CountData++] = Pull(&swUART);
+              }
+              else{
+                main_fsm = wait_crc;
+              }
+              break;
+              
+            case wait_crc:
+              jTransmitStr.CRC = Pull(&swUART);
+              break;
+              
+            default:
+              main_fsm = wait_mid;
+              while(!swUART.isEmpty){//Clear data
+                Pull(&swUART);
+              }
+              break;
+            }
+          }
           //TODO main FSM
           //TODO soft UART answering
 //          if(tState == free_bus){
