@@ -202,12 +202,9 @@ INTERRUPT_HANDLER(UART1_TX_IRQHandler, 17)
 INTERRUPT_HANDLER(UART1_RX_IRQHandler, 18)
 {
     UART1->SR&=~UART1_SR_RXNE;
-    if(tState == wait){//Check for end of the package
-      u8WithoutTimeOut++;
-    }
     u16cTime = 0x00;
-    tState = wait;
     Push(&j1708FIFO, UART1->DR);
+    tState = wait;
     //UART1_Rx_Handler(&u16cTime, &tState, &R_FSM, &jReceiveStr);
 }
 #endif

@@ -5,7 +5,7 @@
 //This function get data from fifo 
 uint8_t Pull(FIFO* fifo){
   fifo->isFull = FALSE;
-  uint8_t u8Data = fifo->u8Data[++fifo->u8Tail];
+  uint8_t u8Data = fifo->u8Data[fifo->u8Tail++];
   if(fifo->u8Tail == fifo->u8Head){
     fifo->isEmpty = TRUE;
     fifo->u8Head = fifo->u8Tail = 0x00U;

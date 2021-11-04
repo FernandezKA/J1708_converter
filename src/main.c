@@ -20,17 +20,21 @@ void main(void)
         jTransmitStr.length = 0x17U;
         j1708FIFO.isEmpty = TRUE;
 	for(;;){
-          if(tState == stop_package){//After timeout begin parse received data
-            if(!j1708FIFO.isEmpty){//If new data recieve from UART1, parse it
-              
-              UART1->DR = Pull(&j1708FIFO);
-            } 
+          if(!j1708FIFO.isEmpty){
+            if(tState == free_bus){
+              jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
+            }
           }
+//          if(tState == /*stop_package*/free_bus){//After timeout begin parse received data
+//            if(!j1708FIFO.isEmpty){//If new data recieve from UART1, parse it
+//              jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
+//            } 
+//          }
           //TODO main FSM
           //TODO soft UART answering
-          if(tState == free_bus){
-            jTransmit(&jTransmitStr, 1);
-          }
+//          if(tState == free_bus){
+//            jTransmit(&jTransmitStr, 1);
+//          }
           //while(!jTransmit(&jTransmitStr));
           //for(uint16_t i = 0; i < 0xFFFF; ++i){asm("nop");}
           /*if(test_status(receive_buffer_full) == receive_buffer_full){
