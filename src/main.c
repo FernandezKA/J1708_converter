@@ -18,14 +18,18 @@ void main(void)
         }
         jTransmitStr.CRC = 0xFFU;
         jTransmitStr.length = 0x17U;
+        j1708FIFO.isEmpty = TRUE;
 	for(;;){
+          if(tState == stop_package){//After timeout begin parse received data
+            if(!j1708FIFO.isEmpty){//If new data recieve from UART1, parse it
+              
+              UART1->DR = Pull(&j1708FIFO);
+            } 
+          }
+          //TODO main FSM
+          //TODO soft UART answering
           if(tState == free_bus){
             jTransmit(&jTransmitStr, 1);
-            //GPIOB->ODR|=(1<<5);
-          }
-          else{
-            asm("nop");
-            //GPIOB->ODR&=~(1<<5);
           }
           //while(!jTransmit(&jTransmitStr));
           //for(uint16_t i = 0; i < 0xFFFF; ++i){asm("nop");}

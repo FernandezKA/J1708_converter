@@ -1,31 +1,42 @@
 #include "stm8s_conf.h"
 //User variables
+//The receive and transmit parsed package
 volatile j1708 jReceiveStr;
 volatile j1708 jTransmitStr;
+//Timing variable
 volatile uint8_t u8TimePrior = 0x20;
-enum BUS_STATE bus_state;
-enum TSTATE tState;
-uint16_t u16cTime;
-static uint8_t u8DataCounter = 0x00;
-enum Receive_FSM R_FSM;
+uint16_t u16cTime = 0x00U;
+enum TSTATE tState = wait;
+//Receive data from j1708
+uint8_t u8WithoutTimeOut = 0x00;
+bool isTimeout = FALSE; 
+FIFO j1708FIFO;
+//static uint8_t u8DataCounter = 0x00;
+//enum Receive_FSM R_FSM;
 //User function declaration
 //j1708 receive packet
-j1708 jReceive(enum Receive_FSM* eFSM){
+j1708 jReceive(struct FIFO_STR* fReceive){
   j1708 rStruct;
-  switch(*eFSM){
-  case MID:
-      jReceiveStr.MID = UART1->DR;
-      break;
-  case DATA:
-      
-      break;
-  case CRC:
-      
-      break;
-    default:
-    
-    break;
+  rStruct.length = fReceive ->u8Head - fReceive ->u8Tail - 0x02;
+  rStruct.MID = Pull(fReceive);
+  for(uint8_t i = 0; i < rStruct.length; ++i){
+    rStruct.data[i] = Pull(fReceive);
   }
+  rStruct.CRC = Pull(fReceive);
+//  switch(*eFSM){
+//  case MID:
+//      jReceiveStr.MID = UART1->DR;
+//      break;
+//  case DATA:
+//      
+//      break;
+//  case CRC:
+//      
+//      break;
+//    default:
+//    
+//    break;
+//  }
   return rStruct;
 }
 //j1708 transmit packet
@@ -67,29 +78,30 @@ void jTransmit(volatile j1708* tStruct, uint8_t u8Priority){
     }
   }
 //IRQ UART
-void UART1_Rx_Handler(uint16_t* cTime, enum TSTATE* cState, enum Receive_FSM* R_FSM, volatile j1708* RPack){
-  *cTime = 0x00;//Set zero time
-  *cState = wait;//Set wait state
-  switch(*R_FSM){
-  case MID:
-    RPack ->MID = UART1->DR;
-    *R_FSM = DATA;
-    break;
-  case DATA:
-    if(u8DataCounter < 21){
-      RPack->data[++u8DataCounter] = UART1->DR;
-    }
-    else{
-      u8DataCounter = 0x00U;
-      *R_FSM = CRC;
-    }
-    break;
-  case CRC:
-    RPack->CRC = UART1->DR;
-    *R_FSM = MID;
-    break;
-  default:
-    
-    break;
-  }
-}
+//void UART1_Rx_Handler(uint16_t* cTime, enum TSTATE* cState, enum Receive_FSM* R_FSM, volatile j1708* RPack){
+//  *cTime = 0x00;//Set zero time
+//  *cState = wait;//Set wait state
+//  
+//  switch(*R_FSM){
+//  case MID:
+//    RPack ->MID = UART1->DR;
+//    *R_FSM = DATA;
+//    break;
+//  case DATA:
+//    if(u8DataCounter < 21){
+//      RPack->data[++u8DataCounter] = UART1->DR;
+//    }
+//    else{
+//      u8DataCounter = 0x00U;
+//      *R_FSM = CRC;
+//    }
+//    break;
+//  case CRC:
+//    RPack->CRC = UART1->DR;
+//    *R_FSM = MID;
+//    break;
+//  default:
+//    
+//    break;
+//  }
+//}

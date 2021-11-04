@@ -1,6 +1,7 @@
 #include "stm8s_conf.h"
 #include "stm8s_it.h"
 #include "softuart.h"
+#include "fifo.h"
 
 #ifndef TRAP_IRQ
 //TRAP Interrupt routine
@@ -201,7 +202,13 @@ INTERRUPT_HANDLER(UART1_TX_IRQHandler, 17)
 INTERRUPT_HANDLER(UART1_RX_IRQHandler, 18)
 {
     UART1->SR&=~UART1_SR_RXNE;
-    UART1_Rx_Handler(&u16cTime, &tState, &R_FSM, &jReceiveStr);
+    if(tState == wait){//Check for end of the package
+      u8WithoutTimeOut++;
+    }
+    u16cTime = 0x00;
+    tState = wait;
+    Push(&j1708FIFO, UART1->DR);
+    //UART1_Rx_Handler(&u16cTime, &tState, &R_FSM, &jReceiveStr);
 }
 #endif
 #endif /* (STM8S208) || (STM8S207) || (STM8S103) || (STM8S903) || (STM8AF62Ax) || (STM8AF52Ax) */
