@@ -11,7 +11,6 @@ PORTD6 - HW UART1 RX
 --LED
 PORTB5 - LED RUN
 --BAUDRATE
-For soft uart 9600
-For hard UART 19200
+9600
 Fclk = 16 MHz (internal RC)
 
