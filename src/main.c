@@ -74,6 +74,7 @@ static void SysInit(void){
   GPIO_Config();
   UART_Config();
   Tim1_Config();
+  Tim4_Config();
   uart_init();
   uart_receive_enable;
   enable_cc_interrupt;

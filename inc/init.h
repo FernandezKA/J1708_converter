@@ -9,4 +9,5 @@ void GPIO_Config(void);
 void CLK_Config(void);
 void UART_Config(void);
 void Tim1_Config(void);
+void Tim4_Config(void);
 #endif

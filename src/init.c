@@ -34,3 +34,10 @@ void Tim1_Config(void){
   TIM1->IER |= TIM1_IER_UIE;
   TIM1->CR1|=TIM1_CR1_CEN;
 }
+//This function config Tim4 for indicate an activity
+void Tim4_Config(void){
+  TIM4->CR1|=TIM4_CR1_ARPE|TIM4_CR1_CEN;
+  TIM4->IER|=TIM4_IER_UIE;
+  TIM4->PSCR = 0x10;
+  TIM4->ARR|=100U;
+}

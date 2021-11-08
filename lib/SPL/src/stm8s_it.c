@@ -301,9 +301,16 @@ INTERRUPT_HANDLER(TIM6_UPD_OVF_TRG_IRQHandler, 23)
 #else /* STM8S208 or STM8S207 or STM8S105 or STM8S103 or STM8AF52Ax or STM8AF62Ax or STM8AF626x */
 #ifndef TIM4_UPD_OVF_IRQ
 //Timer4 Update/Overflow Interrupt routine.
+static uint16_t u16LedCnt = 0;
 INTERRUPT_HANDLER(TIM4_UPD_OVF_IRQHandler, 23)
 {
-	while (1){};
+  if(u16LedCnt == 50000){
+    u16LedCnt = 0;
+    GPIOB->ODR^=(1<<5);
+  }
+  else{
+    u16LedCnt++;
+  }
 }
 #endif
 #endif /* (STM8S903) || (STM8AF622x)*/
