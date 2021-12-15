@@ -26,6 +26,8 @@ void main(void)
           if(!j1708FIFO.isEmpty){//Check for j1708 end of transaction
             if(tState == free_bus){
               jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
+              //TODO: Add reflect j1708 packet to RS232
+              
             }
           }
           if(test_status(receive_buffer_full) == receive_buffer_full){//Receive data from software UART
@@ -55,7 +57,8 @@ void main(void)
               break;
               
             case wait_crc:
-              jTransmitStr.CRC = Pull(&swUART);//It's not workig CRC
+              jTransmitStr.CRC = Pull(&swUART);//It's not working CRC
+              //TODO: 
               break;
               
             default:
