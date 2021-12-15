@@ -2,6 +2,7 @@
 #include "init.h"
 #include "softuart.h"
 #include "fifo.h"
+#include "communication.h"
 //User defines
 #define enIRQ asm("rim")
 #define disIRQ asm("sim")
@@ -27,7 +28,7 @@ void main(void)
             if(tState == free_bus){
               jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
               //TODO: Add reflect j1708 packet to RS232
-              
+              ReflectPacket(From_j1708_to_RS232, &jReceiveStr);
             }
           }
           if(test_status(receive_buffer_full) == receive_buffer_full){//Receive data from software UART

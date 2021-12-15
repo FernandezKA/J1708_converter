@@ -29,8 +29,8 @@ struct J1708{
 };
 typedef struct J1708 j1708;
 //User variables
-extern volatile j1708 jReceiveStr;
-extern volatile j1708 jTransmitStr;
+extern j1708 jReceiveStr;
+extern j1708 jTransmitStr;
 extern volatile uint8_t u8TimePrior;
 //User function definition
 //This function for receieve data from j1708 bus
