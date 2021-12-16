@@ -24,7 +24,8 @@ void main(void)
         swUART.isEmpty = TRUE;//A little of black magic 
         j1708FIFO.isEmpty = TRUE;
 	for(;;){
-          if(!j1708FIFO.isEmpty){//Check for j1708 end of transaction
+          asm("nop");
+          if(j1708FIFO.isEmpty == FALSE){//Check for j1708 end of transaction
             if(tState == free_bus){
               jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
               //TODO: Add reflect j1708 packet to RS232
@@ -79,9 +80,9 @@ static void SysInit(void){
   UART_Config();
   Tim1_Config();
   Tim4_Config();
-  uart_init();
-  uart_receive_enable;
-  enable_cc_interrupt;
+  //uart_init();
+  //uart_receive_enable;
+  //enable_cc_interrupt;
   enableInterrupts();	
 }
 //Assert failed for SPL 

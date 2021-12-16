@@ -304,6 +304,7 @@ INTERRUPT_HANDLER(TIM6_UPD_OVF_TRG_IRQHandler, 23)
 static uint16_t u16LedCnt = 0;
 INTERRUPT_HANDLER(TIM4_UPD_OVF_IRQHandler, 23)
 {
+  TIM4->SR1 &= ~TIM4_SR1_UIF;
   if(u16LedCnt == 50000){
     u16LedCnt = 0;
     GPIOB->ODR^=(1<<5);
