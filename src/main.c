@@ -10,6 +10,7 @@
 static void SysInit(void);
 static inline void PrintHelp(void);
 static inline void SendArray(uint8_t* pData, uint8_t Size);
+static inline uint8_t GetCRC(j1708* Struct);
 //Main section
 uint8_t RxBuf;
 enum MAIN_FSM{
@@ -57,6 +58,8 @@ void main(void)
               }
               else{
                 main_fsm = wait_crc;
+                //Delete wait CRC and add calculate CRC software
+                jTransmitStr.CRC = GetCRC(&jTransmitStr);
               }
               break;
               
@@ -103,5 +106,14 @@ static inline void SendArray(uint8_t* pData, uint8_t Size){
     while(test_status(transmit_data_reg_empty) != transmit_data_reg_empty) {asm("nop");}
     uart_send(*(pData + i));
   }
+}
+static inline uint8_t GetCRC(j1708* Struct){
+  uint16_t Sum = 0x00;
+  for(uint8_t i = 0; i < Struct->length; ++i){
+    Sum += Struct ->data[i];
+  }
+  uint8_t CRC = 0x00;
+  CRC = (uint8_t) (Sum & 0xFF) ^ 0xFF; 
+  return CRC;
 }
 #endif
