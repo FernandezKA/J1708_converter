@@ -8,6 +8,8 @@
 #define disIRQ asm("sim")
 //Function definition
 static void SysInit(void);
+static inline void PrintHelp(void);
+static inline void SendArray(uint8_t* pData, uint8_t Size);
 //Main section
 uint8_t RxBuf;
 enum MAIN_FSM{
@@ -21,6 +23,7 @@ static struct FIFO_STR swUART;
 void main(void)
 {
 	SysInit();
+        PrintHelp();
         swUART.isEmpty = TRUE;//A little of black magic 
         j1708FIFO.isEmpty = TRUE;
 	for(;;){
@@ -28,7 +31,6 @@ void main(void)
           if(j1708FIFO.isEmpty == FALSE){//Check for j1708 end of transaction
             if(tState == free_bus){
               jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
-              //TODO: Add reflect j1708 packet to RS232
               ReflectPacket(From_j1708_to_RS232, &jReceiveStr);
             }
           }
@@ -80,9 +82,9 @@ static void SysInit(void){
   UART_Config();
   Tim1_Config();
   Tim4_Config();
-  //uart_init();
-  //uart_receive_enable;
-  //enable_cc_interrupt;
+  uart_init();
+  uart_receive_enable;
+  enable_cc_interrupt;
   enableInterrupts();	
 }
 //Assert failed for SPL 
@@ -90,5 +92,16 @@ static void SysInit(void){
 void assert_failed(u8 *file, u32 line)
 {
   return;
+}
+static inline void PrintHelp(void){
+  SendArray("For transmit data send packet J1708 with structure MID + Size + Data. CRC calculate software\n\r", 95);
+}
+
+static inline void SendArray(uint8_t* pData, uint8_t Size){
+  for( uint8_t i = 0; i < Size; ++i){
+    //Wait TXE flags
+    while(test_status(transmit_data_reg_empty) != transmit_data_reg_empty) {asm("nop");}
+    uart_send(*(pData + i));
+  }
 }
 #endif
