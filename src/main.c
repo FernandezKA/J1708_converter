@@ -17,7 +17,8 @@ enum MAIN_FSM{
   wait_mid, 
   wait_size, 
   wait_data, 
-  wait_crc
+  wait_crc, 
+  wait_priority
 };
 static enum MAIN_FSM main_fsm = wait_mid;
 static struct FIFO_STR swUART;
@@ -27,12 +28,13 @@ void main(void)
         PrintHelp();
         swUART.isEmpty = TRUE;//A little of black magic 
         j1708FIFO.isEmpty = TRUE;
+        uint8_t u8Priority = 0x00;
 	for(;;){
           asm("nop");
           if(j1708FIFO.isEmpty == FALSE){//Check for j1708 end of transaction
             if(tState == free_bus){
               jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
-              ReflectPacket(From_j1708_to_RS232, &jReceiveStr);
+              ReflectPacket(From_j1708_to_RS232, &jReceiveStr, 0);
             }
           }
           if(test_status(receive_buffer_full) == receive_buffer_full){//Receive data from software UART
@@ -57,12 +59,17 @@ void main(void)
                 jTransmitStr.data[u8CountData++] = Pull(&swUART);
               }
               else{
-                main_fsm = wait_crc;
                 //Delete wait CRC and add calculate CRC software
                 jTransmitStr.CRC = GetCRC(&jTransmitStr);
+                main_fsm = wait_priority;
               }
               break;
               
+            case wait_priority:
+              main_fsm = wait_mid;
+              u8Priority = Pull(&swUART);
+              ReflectPacket(From_RS232_to_j1708, &jTransmitStr, u8Priority);
+              break;
             case wait_crc:
               jTransmitStr.CRC = Pull(&swUART);//It's not working CRC
               //TODO: 
@@ -97,11 +104,11 @@ void assert_failed(u8 *file, u32 line)
   return;
 }
 static inline void PrintHelp(void){
-  SendArray("For transmit data send packet J1708 with structure MID + Size + Data. CRC calculate software\n\r", 95);
+  SendArray("For transmit data send packet J1708 with structure MID + Size + Data + priority. CRC calculate software\n\r", 106);
 }
 
 static inline void SendArray(uint8_t* pData, uint8_t Size){
-  for( uint8_t i = 0; i < Size; ++i){
+  for(uint8_t i = 0; i < Size; ++i){
     //Wait TXE flags
     while(test_status(transmit_data_reg_empty) != transmit_data_reg_empty) {asm("nop");}
     uart_send(*(pData + i));

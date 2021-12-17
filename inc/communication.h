@@ -12,5 +12,5 @@ enum DirectionReflect{
   From_j1708_to_RS232
 };
 //User functions
-void ReflectPacket(enum DirectionReflect Direction,struct J1708* packet);
+void ReflectPacket(enum DirectionReflect Direction,struct J1708* packet, uint8_t priority);
 #endif
