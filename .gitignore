@@ -5,3 +5,5 @@ $ cat .gitignore
 *.ewt
 /Debug
 /settings
+
+*.json

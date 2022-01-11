@@ -28,7 +28,8 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __STM8S_CONF_H
 #define __STM8S_CONF_H
-
+#define TRUE true
+#define FALSE false
 /* Includes ------------------------------------------------------------------*/
 #include "stm8s.h"
 #include "j1708.h"

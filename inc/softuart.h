@@ -2,6 +2,9 @@
 #define _softuart_h_
 
 #include "stm8s.h"
+
+#define TRUE true
+#define FALSE false
 /**
   ******************************************************************************
   * @file swuart.h

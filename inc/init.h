@@ -2,6 +2,9 @@
 #define _init_h_
 #include "stm8s_conf.h"
 //User definition
+
+#define TRUE true
+#define FALSE false
 #define Fclk 16000000UL
 #define BAUD 9600UL
 //Function declaration

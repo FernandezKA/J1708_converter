@@ -2,6 +2,8 @@
 #include "fifo.h"
 //User variable declarations
 //User function definitions
+#define TRUE true
+#define FALSE false
 //This function get data from fifo 
 uint8_t Pull(FIFO* fifo){
   fifo->isFull = FALSE;

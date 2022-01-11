@@ -104,7 +104,7 @@ void assert_failed(u8 *file, u32 line)
   return;
 }
 static inline void PrintHelp(void){
-  SendArray("For transmit data send packet J1708 with structure MID + Size + Data + priority. CRC calculate software\n\r", 106);
+  SendArray((uint8_t *)"For transmit data send packet J1708 with structure MID + Size + Data + priority. CRC calculate software\n\r", 106);
 }
 
 static inline void SendArray(uint8_t* pData, uint8_t Size){
