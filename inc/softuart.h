@@ -5,6 +5,9 @@
 
 #define TRUE true
 #define FALSE false
+
+#define SWUART_RECEIVE_USED
+#define SWUART_TRANSMIT_USED
 /**
   ******************************************************************************
   * @file swuart.h

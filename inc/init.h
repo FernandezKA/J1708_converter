@@ -2,7 +2,8 @@
 #define _init_h_
 #include "stm8s_conf.h"
 //User definition
-
+#define SWUART_RECEIVE_USED
+#define SWUART_TRANSMIT_USED
 #define TRUE true
 #define FALSE false
 #define Fclk 16000000UL

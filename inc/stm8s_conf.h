@@ -31,6 +31,7 @@
 #define TRUE true
 #define FALSE false
 /* Includes ------------------------------------------------------------------*/
+#include <stdbool.h>
 #include "stm8s.h"
 #include "j1708.h"
 /* Uncomment the line below to enable peripheral header file inclusion */
