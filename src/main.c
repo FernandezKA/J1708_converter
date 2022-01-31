@@ -14,6 +14,8 @@ static inline uint8_t GetCRC(j1708* Struct);
 //Main section
 uint8_t RxBuf;
 enum MAIN_FSM{
+  set_mode, 
+  CRC_mode,  
   wait_mid, 
   wait_size, 
   wait_data, 
@@ -21,6 +23,7 @@ enum MAIN_FSM{
   wait_priority
 };
 static enum MAIN_FSM main_fsm = wait_mid;
+enum CRC_MODE crc_mode;
 static struct FIFO_STR swUART;
 void main(void)
 {
@@ -30,20 +33,48 @@ void main(void)
         j1708FIFO.isEmpty = TRUE;
         uint8_t u8Priority = 0x00;
 	for(;;){
-          asm("nop");
           if(j1708FIFO.isEmpty == FALSE){//Check for j1708 end of transaction
-            if(tState == free_bus){
+            if(tState == free_bus){//Send j1708 packet at RS232
               jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
               ReflectPacket(From_j1708_to_RS232, &jReceiveStr, 0);
             }
           }
+          //Receive data from RS232
           if(test_status(receive_buffer_full) == receive_buffer_full){//Receive data from software UART
             uart_read(&RxBuf);//Load data into buffer uart_sw
             Push(&swUART, RxBuf);//Load data into ring buffer from uart_sw
           }
           static uint8_t u8CountData = 0x00;
+          //Get parse RS232 data
           if(!swUART.isEmpty){//Check UART buffer for new data
             switch(main_fsm){//Parse data from packet frames
+            set_mode: 
+              uint8_t u8Mode = Pull(&swUART);
+              
+              if(u8Mode == 0xFE){
+                main_fsm = CRC_mode;        
+              }
+              else if(u8Mode == 0xFF){
+                main_fsm = wait_mid;
+              }
+              else{
+                main_fsm = set_mode;
+              }
+              break;
+              
+            CRC_mode:
+              uint8_t u8CRC_Mode = Pull(&swUART);
+              if(u8CRC_Mode == 0xFD){
+                crc_mode = hide_invalid;
+              }
+              else if(u8CRC_Mode == 0xFF){
+                crc_mode = show_invalid;
+              }
+              else{
+                
+              }
+              break;
+              
             case wait_mid:
               jTransmitStr.MID = Pull(&swUART);
               main_fsm = wait_size;

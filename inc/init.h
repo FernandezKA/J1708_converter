@@ -14,4 +14,10 @@ void CLK_Config(void);
 void UART_Config(void);
 void Tim1_Config(void);
 void Tim4_Config(void);
+
+enum CRC_MODE{
+  show_invalid, 
+  hide_invalid
+};
+extern enum CRC_MODE crc_mode;
 #endif
