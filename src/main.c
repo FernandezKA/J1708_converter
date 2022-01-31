@@ -9,116 +9,103 @@
 //Function definition
 static void SysInit(void);
 static inline void PrintHelp(void);
-static inline void SendArray(uint8_t* pData, uint8_t Size);
-static inline uint8_t GetCRC(j1708* Struct);
+static inline void SendArray(uint8_t *pData, uint8_t Size);
+static inline uint8_t GetCRC(j1708 *Struct);
 //Main section
 uint8_t RxBuf;
-enum MAIN_FSM{
-  set_mode, 
-  CRC_mode,  
-  wait_mid, 
-  wait_size, 
-  wait_data, 
-  wait_crc, 
-  wait_priority
+enum MAIN_FSM
+{
+  wait_mid,
+  wait_size,
+  wait_data,
+  wait_crc,
+  wait_priority,
+  set_mode,
+  CRC_mode
 };
 static enum MAIN_FSM main_fsm = wait_mid;
-enum CRC_MODE crc_mode;
+//enum CRC_MODE crc_mode;
 static struct FIFO_STR swUART;
 void main(void)
 {
-	SysInit();
-        PrintHelp();
-        swUART.isEmpty = TRUE;//A little of black magic 
-        j1708FIFO.isEmpty = TRUE;
-        uint8_t u8Priority = 0x00;
-	for(;;){
-          if(j1708FIFO.isEmpty == FALSE){//Check for j1708 end of transaction
-            asm("nop");
-            if(tState == free_bus){//Send j1708 packet at RS232
-              jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
-              ReflectPacket(From_j1708_to_RS232, &jReceiveStr, 0);
-            }
-          }
-          //Receive data from RS232
-          if(test_status(receive_buffer_full) == receive_buffer_full){//Receive data from software UART
-            uart_read(&RxBuf);//Load data into buffer uart_sw
-            Push(&swUART, RxBuf);//Load data into ring buffer from uart_sw
-          }
-          static uint8_t u8CountData = 0x00;
-          //Get parse RS232 data
-          if(!swUART.isEmpty){//Check UART buffer for new data
-            switch(main_fsm){//Parse data from packet frames
-            set_mode: 
-              uint8_t u8Mode = Pull(&swUART);
-              
-              if(u8Mode == 0xFE){
-                main_fsm = CRC_mode;        
-              }
-              else if(u8Mode == 0xFF){
-                main_fsm = wait_mid;
-              }
-              else{
-                main_fsm = set_mode;
-              }
-              break;
-              
-            CRC_mode:
-              uint8_t u8CRC_Mode = Pull(&swUART);
-              if(u8CRC_Mode == 0xFD){
-                crc_mode = hide_invalid;
-              }
-              else if(u8CRC_Mode == 0xFF){
-                crc_mode = show_invalid;
-              }
-              else{
-                
-              }
-              break;
-              
-            case wait_mid:
-              jTransmitStr.MID = Pull(&swUART);
-              main_fsm = wait_size;
-              break;
-              
-            case wait_size:
-              jTransmitStr.length = Pull(&swUART);
-              main_fsm = wait_data;
-              break;
-              
-            case wait_data:
-              if(u8CountData < jTransmitStr.length){
-                jTransmitStr.data[u8CountData++] = Pull(&swUART);
-              }
-              else{
-                //Delete wait CRC and add calculate CRC software
-                jTransmitStr.CRC = GetCRC(&jTransmitStr);
-                main_fsm = wait_priority;
-              }
-              break;
-              
-            case wait_priority:
-              main_fsm = wait_mid;
-              u8Priority = Pull(&swUART);
-              ReflectPacket(From_RS232_to_j1708, &jTransmitStr, u8Priority);
-              break;
-            case wait_crc:
-              jTransmitStr.CRC = Pull(&swUART);//It's not working CRC
-              //TODO: 
-              break;
-              
-            default:
-              main_fsm = wait_mid;
-              while(!swUART.isEmpty){//Clear data
-                Pull(&swUART);
-              }
-              break;
-            }
-          }
+  SysInit();
+  PrintHelp();
+  swUART.isEmpty = TRUE; //A little of black magic
+  j1708FIFO.isEmpty = TRUE;
+  uint8_t u8Priority = 0x00;
+  for (;;)
+  {
+    if (j1708FIFO.isEmpty == FALSE)
+    { //Check for j1708 end of transaction
+      asm("nop");
+      if (tState == free_bus)
+      {                                     //Send j1708 packet at RS232
+        jReceiveStr = jReceive(&j1708FIFO); //Get parse recieved ring buffer
+        ReflectPacket(From_j1708_to_RS232, &jReceiveStr, 0);
+      }
+    }
+    //Receive data from RS232
+    if (test_status(receive_buffer_full) == receive_buffer_full)
+    {                       //Receive data from software UART
+      uart_read(&RxBuf);    //Load data into buffer uart_sw
+      Push(&swUART, RxBuf); //Load data into ring buffer from uart_sw
+    }
+    static uint8_t u8CountData = 0x00;
+    //Get parse RS232 data
+    if (!swUART.isEmpty)
+    { //Check UART buffer for new data
+      asm("nop");
+      switch (main_fsm)
+      { //Parse data from packet frames  
+
+      case wait_mid:
+        jTransmitStr.MID = Pull(&swUART);
+        main_fsm = wait_size;
+        break;
+
+      case wait_size:
+        jTransmitStr.length = Pull(&swUART);
+        main_fsm = wait_data;
+        break;
+
+      case wait_data:
+        if (u8CountData < jTransmitStr.length)
+        {
+          jTransmitStr.data[u8CountData++] = Pull(&swUART);
         }
+        else
+        {
+          //Delete wait CRC and add calculate CRC software
+          jTransmitStr.CRC = GetCRC(&jTransmitStr);
+          main_fsm = wait_priority;
+        }
+        break;
+
+      case wait_priority:
+        main_fsm = wait_mid;
+        u8Priority = Pull(&swUART);
+        ReflectPacket(From_RS232_to_j1708, &jTransmitStr, u8Priority);
+        break;
+      case wait_crc:
+        jTransmitStr.CRC = Pull(&swUART); //It's not working CRC
+        //TODO:
+        break;
+
+      default:
+        main_fsm = wait_mid;
+        while (!swUART.isEmpty)
+        { //Clear data
+          Pull(&swUART);
+        }
+        break;
+      }
+    }
+  }
 }
+
 //Function declaration
-static void SysInit(void){
+static void SysInit(void)
+{
   CLK_Config();
   GPIO_Config();
   UART_Config();
@@ -127,32 +114,43 @@ static void SysInit(void){
   uart_init();
   uart_receive_enable;
   enable_cc_interrupt;
-  enableInterrupts();	
+  enableInterrupts();
 }
-//Assert failed for SPL 
+
+//Assert failed for SPL
 #ifdef USE_FULL_ASSERT
 void assert_failed(u8 *file, u32 line)
 {
   return;
 }
-static inline void PrintHelp(void){
+
+static inline void PrintHelp(void)
+{
   SendArray((uint8_t *)"For transmit data send packet J1708 with structure MID + Size + Data + priority. CRC calculate software\n\r", 106);
 }
 
-static inline void SendArray(uint8_t* pData, uint8_t Size){
-  for(uint8_t i = 0; i < Size; ++i){
+static inline void SendArray(uint8_t *pData, uint8_t Size)
+{
+  for (uint8_t i = 0; i < Size; ++i)
+  {
     //Wait TXE flags
-    while(test_status(transmit_data_reg_empty) != transmit_data_reg_empty) {asm("nop");}
+    while (test_status(transmit_data_reg_empty) != transmit_data_reg_empty)
+    {
+      asm("nop");
+    }
     uart_send(*(pData + i));
   }
 }
-static inline uint8_t GetCRC(j1708* Struct){
+
+static inline uint8_t GetCRC(j1708 *Struct)
+{
   uint16_t Sum = 0x00;
-  for(uint8_t i = 0; i < Struct->length; ++i){
-    Sum += Struct ->data[i];
+  for (uint8_t i = 0; i < Struct->length; ++i)
+  {
+    Sum += Struct->data[i];
   }
   uint8_t CRC = 0x00;
-  CRC = (uint8_t) (Sum & 0xFF) ^ 0xFF; 
+  CRC = (uint8_t)(Sum & 0xFF) ^ 0xFF;
   return CRC;
 }
 #endif
