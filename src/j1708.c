@@ -14,11 +14,15 @@ FIFO j1708FIFO;
 //User function declaration
 j1708 jReceive(struct FIFO_STR* fReceive){
   j1708 rStruct;
+  //Get data size of buffer
   rStruct.length = fReceive -> u8Head - fReceive ->u8Tail - 0x02;
+  
   rStruct.MID = Pull(fReceive);
+  
   for(uint8_t i = 0; i < rStruct.length; ++i){
     rStruct.data[i] = Pull(fReceive);
   }
+  
   rStruct.CRC = Pull(fReceive);
   return rStruct;
 }

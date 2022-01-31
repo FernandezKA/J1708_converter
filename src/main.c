@@ -34,6 +34,7 @@ void main(void)
         uint8_t u8Priority = 0x00;
 	for(;;){
           if(j1708FIFO.isEmpty == FALSE){//Check for j1708 end of transaction
+            asm("nop");
             if(tState == free_bus){//Send j1708 packet at RS232
               jReceiveStr = jReceive(&j1708FIFO);//Get parse recieved ring buffer
               ReflectPacket(From_j1708_to_RS232, &jReceiveStr, 0);
