@@ -197,7 +197,6 @@ void uart_Tx_timing(void)
 				++Tx_bit; // next bit to transmit
 		};
 	};
-	//Tx_phase =(bool) ~Tx_phase;
 	((Tx_phase == TRUE) ? (Tx_phase = FALSE) : (Tx_phase = TRUE));
 	//Tx_phase= ~Tx_phase;
 }
@@ -273,7 +272,6 @@ void uart_Rx_timing(void)
 			}
 			else
 			{
-				asm("nop");
 				switch (Rx_samp)
 				{ // any other bit, results?
 				case 1:

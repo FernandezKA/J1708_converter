@@ -23,18 +23,23 @@ enum MAIN_FSM
   set_mode,
   CRC_mode
 };
-static enum MAIN_FSM main_fsm = wait_mid;
+//static enum MAIN_FSM main_fsm;
 //enum CRC_MODE crc_mode;
-static struct FIFO_STR swUART;
+//static struct FIFO_STR swUART;
 void main(void)
 {
   SysInit();
   PrintHelp();
-  swUART.isEmpty = TRUE; //A little of black magic
-  j1708FIFO.isEmpty = TRUE;
-  uint8_t u8Priority = 0x00;
+  UART1->CR2&=~UART1_CR2_REN;//ONLY FOR DEBUG!!!
+  //swUART.isEmpty = TRUE; //A little of black magic
+  //j1708FIFO.isEmpty = TRUE;
+  //main_fsm = wait_mid;
+  uint8_t swRequest = 0x00;
+  uint8_t j1708DataCnt = 0x00;
   for (;;)
   {
+    
+    
     if (j1708FIFO.isEmpty == FALSE)
     { //Check for j1708 end of transaction
       asm("nop");
@@ -44,61 +49,54 @@ void main(void)
         ReflectPacket(From_j1708_to_RS232, &jReceiveStr, 0);
       }
     }
+    
+    
+    
+    
     //Receive data from RS232
     if (test_status(receive_buffer_full) == receive_buffer_full)
     {                       //Receive data from software UART
+      asm("sim");
       uart_read(&RxBuf);    //Load data into buffer uart_sw
-      Push(&swUART, RxBuf); //Load data into ring buffer from uart_sw
-    }
-    static uint8_t u8CountData = 0x00;
-    //Get parse RS232 data
-    if (!swUART.isEmpty)
-    { //Check UART buffer for new data
-      asm("nop");
-      switch (main_fsm)
-      { //Parse data from packet frames  
-
-      case wait_mid:
-        jTransmitStr.MID = Pull(&swUART);
-        main_fsm = wait_size;
+      
+      switch(swRequest){
+      case 0x00://MID
+        jTransmitStr.MID = RxBuf;
+        //UART1->DR = jTransmitStr.MID;
+        //uart_send(jTransmitStr.MID);
+        ++swRequest;
         break;
-
-      case wait_size:
-        jTransmitStr.length = Pull(&swUART);
-        main_fsm = wait_data;
+      case 0x01://SIZE
+        jTransmitStr.length = RxBuf;
+        //UART1->DR = jTransmitStr.length;
+        //uart_send(jTransmitStr.length);
+        ++swRequest;
         break;
-
-      case wait_data:
-        if (u8CountData < jTransmitStr.length)
-        {
-          jTransmitStr.data[u8CountData++] = Pull(&swUART);
+      case 0x02://Data 
+        if(j1708DataCnt < jTransmitStr.length - 1){
+          jTransmitStr.data[j1708DataCnt] = RxBuf;
+          //UART1->DR = jTransmitStr.data[j1708DataCnt];
+          //uart_send(jTransmitStr.data[j1708DataCnt]);
+          ++j1708DataCnt;
         }
-        else
-        {
-          //Delete wait CRC and add calculate CRC software
+        else{
+          jTransmitStr.data[j1708DataCnt] = RxBuf;
+          j1708DataCnt = 0x00;
+          //uart_send(jTransmitStr.data[j1708DataCnt]);
           jTransmitStr.CRC = GetCRC(&jTransmitStr);
-          main_fsm = wait_priority;
+          ++swRequest;
         }
         break;
-
-      case wait_priority:
-        main_fsm = wait_mid;
-        u8Priority = Pull(&swUART);
-        ReflectPacket(From_RS232_to_j1708, &jTransmitStr, u8Priority);
-        break;
-      case wait_crc:
-        jTransmitStr.CRC = Pull(&swUART); //It's not working CRC
-        //TODO:
-        break;
-
-      default:
-        main_fsm = wait_mid;
-        while (!swUART.isEmpty)
-        { //Clear data
-          Pull(&swUART);
-        }
+      case 0x03://Calc. CRC
+          //uart_send(RxBuf);
+          jTransmit(&jTransmitStr, RxBuf);
+          swRequest = 0x00;
         break;
       }
+      asm("rim");
+    }
+    else{
+      asm("nop");
     }
   }
 }
@@ -131,6 +129,7 @@ static inline void PrintHelp(void)
 
 static inline void SendArray(uint8_t *pData, uint8_t Size)
 {
+  asm("rim");
   for (uint8_t i = 0; i < Size; ++i)
   {
     //Wait TXE flags

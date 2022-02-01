@@ -23,7 +23,7 @@ extern uint16_t u16cTime;
 //Struct for j1708 packet
 struct J1708{
   uint8_t MID;
-  uint8_t data[21U];
+  uint8_t data[64U];
   uint8_t CRC;
   uint8_t length;
 };
@@ -36,7 +36,7 @@ extern volatile uint8_t u8TimePrior;
 //This function for receieve data from j1708 bus
 j1708 jReceive(struct FIFO_STR* fReceive);
 //This function for transmit data from j1708 bus
-void jTransmit(volatile j1708* tStruct, uint8_t u8Priority);
+void jTransmit(j1708* tStruct, uint8_t u8Priority);
 //This function is IRQ handler for Tim1 
 void Tim1_Handler(enum TSTATE* cState, uint16_t* cTime);
 //This function is IRQ handler for UART1

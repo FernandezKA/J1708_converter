@@ -6,16 +6,16 @@ void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_
 {
       if (Direction == From_RS232_to_j1708)
       {
-            //Send to j1708
+            //Send to  RS232 - > j1708
             jTransmit(packet, priority);
       }
       else
       {
             uint8_t Length = packet->length - 1;
-            //Send to RS232
+            //Send J1708 -> RS232
 
             uint8_t u8CRC = u8CalcCRC(packet->data, packet->length);
-
+            //Received CRC and calculated are equal
             if (u8CRC == packet->CRC)
             {
                   while (test_status(transmit_data_reg_empty) != transmit_data_reg_empty)
@@ -47,6 +47,7 @@ void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_
                   }
                   uart_send(0x0A);
             }
+            //CRC not equal with calculated
             else
             {
                   SendArray("Invalid CRC\n\r", 13);
@@ -81,7 +82,7 @@ void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_
             }
       }
 }
-
+//This function calculate CRC8
 uint8_t u8CalcCRC(uint8_t *pData, uint8_t size)
 {
       uint8_t sum = 0x00;

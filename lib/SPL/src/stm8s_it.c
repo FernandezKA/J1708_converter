@@ -3,6 +3,8 @@
 #include "softuart.h"
 #include "fifo.h"
 
+#define SWUART_RECEIVE_USED
+
 #ifndef TRAP_IRQ
 //TRAP Interrupt routine
 INTERRUPT_HANDLER_TRAP(TRAP_IRQHandler)

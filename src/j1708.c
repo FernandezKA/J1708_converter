@@ -1,5 +1,10 @@
 #include "stm8s_conf.h"
 //User variables
+//This function send uart data
+void uart_Send(uint8_t data){
+  while((UART1->SR&UART1_SR_TC)!= UART1_SR_TC){asm("nop");}
+  UART1->DR = data;
+}
 //The receive and transmit parsed package
 j1708 jReceiveStr;
 j1708 jTransmitStr;
@@ -29,36 +34,21 @@ j1708 jReceive(struct FIFO_STR *fReceive)
   return rStruct;
 }
 //j1708 transmit packet
-void jTransmit(volatile j1708 *tStruct, uint8_t u8Priority)
+void jTransmit(j1708 *tStruct, uint8_t u8Priority)
 {
   u8TimePrior = 8 + 2 * u8Priority;
-  uint8_t u8PackCnt = 0x00;
-  while (u8PackCnt < tStruct->length)
-  {
-    while ((UART1->SR & UART1_SR_TXE) != UART1_SR_TXE)
-    {
-      asm("nop");
-    } //Wait empty buffer
-    if (u8PackCnt == 0x00)
-    { //MID
-      UART1->DR = tStruct->MID;
-    }
-    else if (u8PackCnt == tStruct->length)
-    { //CRC
-      UART1->DR = tStruct->CRC;
-    }
-    else
-    { //Data
-      UART1->DR = tStruct->data[u8PackCnt - 0x01];
-    }
-    ++u8PackCnt;
-  }
-  while ((UART1->SR & UART1_SR_TXE) != UART1_SR_TXE)
-  {
-    asm("nop");
-  }
-  tState = wait;
-  u16cTime = 0x00;
+  while(u8TimePrior < u16cTime){asm("nop");}//Wait priority time
+  asm("sim");
+  //Send MID
+        while((UART1->SR&UART1_SR_TXE) != UART1_SR_TXE){asm("nop");} 
+        UART1->DR = jTransmitStr.MID;
+        for(uint8_t i = 0; i < jTransmitStr.length; ++i){
+          while((UART1->SR&UART1_SR_TC) != UART1_SR_TC){asm("nop");} 
+          UART1->DR = jTransmitStr.data[i];
+        }
+        while((UART1->SR&UART1_SR_TC) != UART1_SR_TC){asm("nop");} 
+        UART1->DR = jTransmitStr.CRC;
+  u16cTime = 0x0000;
 }
 //IRQ Handler for TIM1
 void Tim1_Handler(enum TSTATE *cState, uint16_t *cTime)
