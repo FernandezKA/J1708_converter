@@ -11,29 +11,14 @@ static void SysInit(void);
 static inline void PrintHelp(void);
 static inline void SendArray(uint8_t *pData, uint8_t Size);
 static inline uint8_t GetCRC(j1708 *Struct);
+bool shMCRC = false;
 //Main section
 uint8_t RxBuf;
-enum MAIN_FSM
-{
-  wait_mid,
-  wait_size,
-  wait_data,
-  wait_crc,
-  wait_priority,
-  set_mode,
-  CRC_mode
-};
-//static enum MAIN_FSM main_fsm;
-//enum CRC_MODE crc_mode;
-//static struct FIFO_STR swUART;
 void main(void)
 {
   SysInit();
   PrintHelp();
-  UART1->CR2&=~UART1_CR2_REN;//ONLY FOR DEBUG!!!
-  //swUART.isEmpty = TRUE; //A little of black magic
-  //j1708FIFO.isEmpty = TRUE;
-  //main_fsm = wait_mid;
+  //UART1->CR2&=~UART1_CR2_REN;//ONLY FOR DEBUG!!!
   uint8_t swRequest = 0x00;
   uint8_t j1708DataCnt = 0x00;
   for (;;)
@@ -49,58 +34,54 @@ void main(void)
         ReflectPacket(From_j1708_to_RS232, &jReceiveStr, 0);
       }
     }
-    
-    
-    
-    
     //Receive data from RS232
     if (test_status(receive_buffer_full) == receive_buffer_full)
     {                       //Receive data from software UART
       asm("sim");
       uart_read(&RxBuf);    //Load data into buffer uart_sw
-      
+      if(swRequest == 0x00 && RxBuf == 0xFF){//CRC mode view
+        if (shMCRC){
+          shMCRC = false;
+          SendArray((uint8_t*)"Hide packets with mistakes\r\n", 28);
+        }
+        else{
+          shMCRC = true;
+          SendArray((uint8_t*)"Show packets with mistakes\r\n", 28);
+        }
+        asm("nop");
+      }
+      else{
       switch(swRequest){
       case 0x00://MID
         jTransmitStr.MID = RxBuf;
-        //UART1->DR = jTransmitStr.MID;
-        //uart_send(jTransmitStr.MID);
         ++swRequest;
         break;
       case 0x01://SIZE
         jTransmitStr.length = RxBuf;
-        //UART1->DR = jTransmitStr.length;
-        //uart_send(jTransmitStr.length);
         ++swRequest;
         break;
       case 0x02://Data 
         if(j1708DataCnt < jTransmitStr.length - 1){
           jTransmitStr.data[j1708DataCnt] = RxBuf;
-          //UART1->DR = jTransmitStr.data[j1708DataCnt];
-          //uart_send(jTransmitStr.data[j1708DataCnt]);
           ++j1708DataCnt;
         }
         else{
           jTransmitStr.data[j1708DataCnt] = RxBuf;
           j1708DataCnt = 0x00;
-          //uart_send(jTransmitStr.data[j1708DataCnt]);
           jTransmitStr.CRC = GetCRC(&jTransmitStr);
           ++swRequest;
         }
         break;
       case 0x03://Calc. CRC
-          //uart_send(RxBuf);
           jTransmit(&jTransmitStr, RxBuf);
           swRequest = 0x00;
         break;
       }
       asm("rim");
     }
-    else{
-      asm("nop");
     }
   }
 }
-
 //Function declaration
 static void SysInit(void)
 {
@@ -114,19 +95,18 @@ static void SysInit(void)
   enable_cc_interrupt;
   enableInterrupts();
 }
-
 //Assert failed for SPL
 #ifdef USE_FULL_ASSERT
 void assert_failed(u8 *file, u32 line)
 {
   return;
 }
-
+//For print info message
 static inline void PrintHelp(void)
 {
   SendArray((uint8_t *)"For transmit data send packet J1708 with structure MID + Size + Data + priority. CRC calculate software\n\r", 106);
 }
-
+//For send array of data to soft uart
 static inline void SendArray(uint8_t *pData, uint8_t Size)
 {
   asm("rim");
@@ -140,16 +120,21 @@ static inline void SendArray(uint8_t *pData, uint8_t Size)
     uart_send(*(pData + i));
   }
 }
-
+//This function calculate CRC for structure
 static inline uint8_t GetCRC(j1708 *Struct)
 {
-  uint16_t Sum = 0x00;
-  for (uint8_t i = 0; i < Struct->length; ++i)
-  {
-    Sum += Struct->data[i];
+  uint8_t sum = Struct ->MID;
+  for(uint8_t i = 0; i < Struct->length; ++i){
+    if (sum + Struct->data[i] > 0xFF)
+            {
+                  sum++;
+                  sum += Struct->data[i];
+            }
+            else
+            {
+                  sum += Struct->data[i];
+            }
   }
-  uint8_t CRC = 0x00;
-  CRC = (uint8_t)(Sum & 0xFF) ^ 0xFF;
-  return CRC;
+      return sum ^ 0xFF;
 }
 #endif

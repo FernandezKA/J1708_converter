@@ -50,6 +50,7 @@ void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_
             //CRC not equal with calculated
             else
             {
+              if(shMCRC){
                   SendArray("Invalid CRC\n\r", 13);
                   while (test_status(transmit_data_reg_empty) != transmit_data_reg_empty)
                   {
@@ -80,6 +81,10 @@ void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_
                   }
                   uart_send(0x0A);
             }
+              else{
+              asm("nop");
+              }
+            }
       }
 }
 //This function calculate CRC8
@@ -102,7 +107,7 @@ uint8_t u8CalcCRC(uint8_t *pData, uint8_t size)
 
       return sum ^ 0xFF;
 }
-//This function send message
+//This function send info message
 static inline void SendArray(char *pData, uint8_t Size)
 {
       for (uint8_t i = 0; i < Size; ++i)

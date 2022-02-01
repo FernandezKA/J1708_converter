@@ -33,22 +33,20 @@ j1708 jReceive(struct FIFO_STR *fReceive)
   rStruct.CRC = Pull(fReceive);
   return rStruct;
 }
-//j1708 transmit packet
+//Tris function send j1708 packet to soft uart
 void jTransmit(j1708 *tStruct, uint8_t u8Priority)
 {
   u8TimePrior = 8 + 2 * u8Priority;
-  asm("rim");
   while(u8TimePrior > u16cTime){asm("nop");}//Wait priority time
-  asm("sim");
   //Send MID
         while((UART1->SR&UART1_SR_TXE) != UART1_SR_TXE){asm("nop");} 
-        UART1->DR = jTransmitStr.MID;
+        UART1->DR = ~jTransmitStr.MID;
         for(uint8_t i = 0; i < jTransmitStr.length; ++i){
           while((UART1->SR&UART1_SR_TC) != UART1_SR_TC){asm("nop");} 
-          UART1->DR = jTransmitStr.data[i];
+          UART1->DR = ~jTransmitStr.data[i];
         }
         while((UART1->SR&UART1_SR_TC) != UART1_SR_TC){asm("nop");} 
-        UART1->DR = jTransmitStr.CRC;
+        UART1->DR = ~jTransmitStr.CRC;
   u16cTime = 0x0000;
 }
 //IRQ Handler for TIM1
@@ -69,6 +67,5 @@ void Tim1_Handler(enum TSTATE *cState, uint16_t *cTime)
   else if ((*cTime) > u8TimePrior)
   {
     *cState = free_bus;
-    //GPIOB->ODR&=~(1<<5);
   }
 }
