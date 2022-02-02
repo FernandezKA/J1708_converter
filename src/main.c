@@ -18,7 +18,7 @@ void main(void)
 {
   SysInit();
   PrintHelp();
-  //UART1->CR2&=~UART1_CR2_REN;//ONLY FOR DEBUG!!!
+  UART1->CR2&=~UART1_CR2_REN;//ONLY FOR DEBUG!!!
   uint8_t swRequest = 0x00;
   uint8_t j1708DataCnt = 0x00;
   for (;;)
@@ -125,15 +125,16 @@ static inline uint8_t GetCRC(j1708 *Struct)
 {
   uint8_t sum = Struct ->MID;
   for(uint8_t i = 0; i < Struct->length; ++i){
-    if (sum + Struct->data[i] > 0xFF)
-            {
-                  //sum--;
-                  sum += Struct->data[i];
-            }
-            else
-            {
-                  sum += Struct->data[i];
-            }
+//    if (sum + Struct->data[i] > 0xFF)
+//            {
+//                  //sum--;
+//                  sum += Struct->data[i];
+//            }
+//            else
+//            {
+//                  sum += Struct->data[i];
+//            }
+      sum += Struct->data[i];
   }
       return (sum ^ 0xFF)+1;
 }

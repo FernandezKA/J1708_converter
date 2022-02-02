@@ -97,15 +97,16 @@ uint8_t u8CalcCRC(j1708* packet)
 {
   uint8_t sum = packet ->MID;
   for(uint8_t i = 0; i < packet->length; ++i){
-    if (sum + packet->data[i] > 0xFF)
-            {
-                  //sum--;
-                  sum += packet->data[i];
-            }
-            else
-            {
-                  sum += packet->data[i];
-            }
+//    if (sum + packet->data[i] > 0xFF)
+//            {
+//                  //sum--;
+//                  sum += packet->data[i];
+//            }
+//            else
+//            {
+//                  sum += packet->data[i];
+//            }
+    sum += packet->data[i];
   }
       return (sum ^ 0xFF)+0x01;
 }
