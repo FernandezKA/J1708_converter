@@ -10,7 +10,7 @@
 static void SysInit(void);
 static inline void PrintHelp(void);
 static inline void SendArray(uint8_t *pData, uint8_t Size);
-static inline uint8_t GetCRC(j1708 *Struct);
+//static inline uint8_t GetCRC(j1708 *Struct);
 bool shMCRC = false;
 //Main section
 uint8_t RxBuf;
@@ -19,8 +19,8 @@ void main(void)
   SysInit();
   PrintHelp();
   //UART1->CR2&=~UART1_CR2_REN;//ONLY FOR DEBUG!!!
-  uint8_t swRequest = 0x00;
-  uint8_t j1708DataCnt = 0x00;
+  //uint8_t swRequest = 0x00;
+  //uint8_t j1708DataCnt = 0x00;
   for (;;)
   {
     
@@ -103,6 +103,7 @@ void assert_failed(u8 *file, u32 line)
 //For print info message
 static inline void PrintHelp(void)
 {
+  SendArray((uint8_t*)"J1708 converter. ver. 0.1 2022-02-02\n\r", 38);
   SendArray((uint8_t *)"J1708 Receiver. Only listen J1708, transmit isn't supported\n\r", 61);
   SendArray((uint8_t*) "Send 0xFF to show invalid CRC packets\n\r", 39);
 }
@@ -121,21 +122,21 @@ static inline void SendArray(uint8_t *pData, uint8_t Size)
   }
 }
 //This function calculate CRC for structure
-static inline uint8_t GetCRC(j1708 *Struct)
-{
-  uint8_t sum = Struct ->MID;
-  for(uint8_t i = 0; i < Struct->length; ++i){
-//    if (sum + Struct->data[i] > 0xFF)
-//            {
-//                  //sum--;
-//                  sum += Struct->data[i];
-//            }
-//            else
-//            {
-//                  sum += Struct->data[i];
-//            }
-      sum += Struct->data[i];
-  }
-      return (sum ^ 0xFF)+1;
-}
+//static inline uint8_t GetCRC(j1708 *Struct)
+//{
+//  uint8_t sum = Struct ->MID;
+//  for(uint8_t i = 0; i < Struct->length; ++i){
+////    if (sum + Struct->data[i] > 0xFF)
+////            {
+////                  //sum--;
+////                  sum += Struct->data[i];
+////            }
+////            else
+////            {
+////                  sum += Struct->data[i];
+////            }
+//      sum += Struct->data[i];
+//  }
+//      return (sum ^ 0xFF)+1;
+//}
 #endif
