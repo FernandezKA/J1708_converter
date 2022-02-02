@@ -88,7 +88,7 @@
 // next macro initializes and enable TIM2 base and interrupt system, divider
 // register /1, auto reload register, enable interrupt on update, update on overflow
 #define init_UART_timing	{\
-	TIM2_TimeBaseInit(TIM2_PRESCALER_1, 417);\
+	TIM2_TimeBaseInit(TIM2_PRESCALER_1, 833);\
 	TIM2_ITConfig(TIM2_IT_UPDATE, ENABLE);\
 	TIM2_UpdateRequestConfig(TIM2_UPDATESOURCE_REGULAR);\
 	TIM2_Cmd(ENABLE);\

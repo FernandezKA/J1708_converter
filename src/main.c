@@ -18,7 +18,7 @@ void main(void)
 {
   SysInit();
   PrintHelp();
-  UART1->CR2&=~UART1_CR2_REN;//ONLY FOR DEBUG!!!
+  //UART1->CR2&=~UART1_CR2_REN;//ONLY FOR DEBUG!!!
   uint8_t swRequest = 0x00;
   uint8_t j1708DataCnt = 0x00;
   for (;;)
