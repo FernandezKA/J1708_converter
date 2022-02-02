@@ -39,7 +39,7 @@ void main(void)
     {                       //Receive data from software UART
       asm("sim");
       uart_read(&RxBuf);    //Load data into buffer uart_sw
-      if(swRequest == 0x00 && RxBuf == 0xFF){//CRC mode view
+      if(RxBuf == 0xFF){//CRC mode view
         if (shMCRC){
           shMCRC = false;
           SendArray((uint8_t*)"Hide packets with mistakes\r\n", 28);
@@ -48,7 +48,6 @@ void main(void)
           shMCRC = true;
           SendArray((uint8_t*)"Show packets with mistakes\r\n", 28);
         }
-        asm("nop");
       }
 //      else{
 //      switch(swRequest){

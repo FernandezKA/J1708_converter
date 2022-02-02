@@ -74,7 +74,7 @@ void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_
                   {
                         asm("nop");
                   }
-                  uart_send(u8CRC);
+                  uart_send('#');
                   while (test_status(transmit_data_reg_empty) != transmit_data_reg_empty)
                   {
                         asm("nop");
