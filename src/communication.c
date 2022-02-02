@@ -1,5 +1,5 @@
 #include "communication.h"
-
+#include "j1708.h"
 static inline void SendArray(char *pData, uint8_t Size);
 //Function declaration
 void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_t priority)
@@ -14,7 +14,7 @@ void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_
             uint8_t Length = packet->length - 1;
             //Send J1708 -> RS232
 
-            uint8_t u8CRC = u8CalcCRC(packet->data, packet->length);
+            volatile uint8_t u8CRC = u8CalcCRC(packet);
             //Received CRC and calculated are equal
             if (u8CRC == packet->CRC)
             {
@@ -51,7 +51,7 @@ void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_
             else
             {
               if(shMCRC){
-                  SendArray("Invalid CRC\n\r", 13);
+                  //SendArray("Invalid CRC\n\r", 13);
                   while (test_status(transmit_data_reg_empty) != transmit_data_reg_empty)
                   {
                         asm("nop");
@@ -74,6 +74,11 @@ void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_
                   {
                         asm("nop");
                   }
+                  uart_send(u8CRC);
+                  while (test_status(transmit_data_reg_empty) != transmit_data_reg_empty)
+                  {
+                        asm("nop");
+                  }
                   uart_send(0x0D);
                   while (test_status(transmit_data_reg_empty) != transmit_data_reg_empty)
                   {
@@ -88,24 +93,21 @@ void ReflectPacket(enum DirectionReflect Direction, struct J1708 *packet, uint8_
       }
 }
 //This function calculate CRC8
-uint8_t u8CalcCRC(uint8_t *pData, uint8_t size)
+uint8_t u8CalcCRC(j1708* packet)
 {
-      uint8_t sum = 0x00;
-
-      for (uint8_t i = 0; i < size; ++i)
-      {
-            if (sum + pData[i] > 0xFF)
+  uint8_t sum = packet ->MID;
+  for(uint8_t i = 0; i < packet->length; ++i){
+    if (sum + packet->data[i] > 0xFF)
             {
-                  sum++;
-                  sum += pData[i];
+                  //sum--;
+                  sum += packet->data[i];
             }
             else
             {
-                  sum += pData[i];
+                  sum += packet->data[i];
             }
-      }
-
-      return sum ^ 0xFF;
+  }
+      return (sum ^ 0xFF)+0x01;
 }
 //This function send info message
 static inline void SendArray(char *pData, uint8_t Size)

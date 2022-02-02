@@ -29,6 +29,7 @@ struct J1708{
 };
 typedef struct J1708 j1708;
 extern bool shMCRC;
+
 //User variables
 extern j1708 jReceiveStr;
 extern j1708 jTransmitStr;

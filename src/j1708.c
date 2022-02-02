@@ -1,4 +1,5 @@
 #include "stm8s_conf.h"
+#include "j1708.h"
 //User variables
 //This function send uart data
 void uart_Send(uint8_t data){
@@ -69,3 +70,4 @@ void Tim1_Handler(enum TSTATE *cState, uint16_t *cTime)
     *cState = free_bus;
   }
 }
+

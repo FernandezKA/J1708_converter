@@ -127,7 +127,7 @@ static inline uint8_t GetCRC(j1708 *Struct)
   for(uint8_t i = 0; i < Struct->length; ++i){
     if (sum + Struct->data[i] > 0xFF)
             {
-                  sum++;
+                  //sum--;
                   sum += Struct->data[i];
             }
             else
@@ -135,6 +135,6 @@ static inline uint8_t GetCRC(j1708 *Struct)
                   sum += Struct->data[i];
             }
   }
-      return sum ^ 0xFF;
+      return (sum ^ 0xFF)+1;
 }
 #endif

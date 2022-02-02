@@ -13,5 +13,5 @@ enum DirectionReflect{
 };
 //User functions
 void ReflectPacket(enum DirectionReflect Direction,struct J1708* packet, uint8_t priority);
-uint8_t u8CalcCRC(uint8_t* pData, uint8_t size);
+uint8_t u8CalcCRC(j1708* packet);
 #endif
