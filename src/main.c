@@ -50,35 +50,35 @@ void main(void)
         }
         asm("nop");
       }
-      else{
-      switch(swRequest){
-      case 0x00://MID
-        jTransmitStr.MID = RxBuf;
-        ++swRequest;
-        break;
-      case 0x01://SIZE
-        jTransmitStr.length = RxBuf;
-        ++swRequest;
-        break;
-      case 0x02://Data 
-        if(j1708DataCnt < jTransmitStr.length - 1){
-          jTransmitStr.data[j1708DataCnt] = RxBuf;
-          ++j1708DataCnt;
-        }
-        else{
-          jTransmitStr.data[j1708DataCnt] = RxBuf;
-          j1708DataCnt = 0x00;
-          jTransmitStr.CRC = GetCRC(&jTransmitStr);
-          ++swRequest;
-        }
-        break;
-      case 0x03://Calc. CRC
-          jTransmit(&jTransmitStr, RxBuf);
-          swRequest = 0x00;
-        break;
-      }
-      asm("rim");
-    }
+//      else{
+//      switch(swRequest){
+//      case 0x00://MID
+//        jTransmitStr.MID = RxBuf;
+//        ++swRequest;
+//        break;
+//      case 0x01://SIZE
+//        jTransmitStr.length = RxBuf;
+//        ++swRequest;
+//        break;
+//      case 0x02://Data 
+//        if(j1708DataCnt < jTransmitStr.length - 1){
+//          jTransmitStr.data[j1708DataCnt] = RxBuf;
+//          ++j1708DataCnt;
+//        }
+//        else{
+//          jTransmitStr.data[j1708DataCnt] = RxBuf;
+//          j1708DataCnt = 0x00;
+//          jTransmitStr.CRC = GetCRC(&jTransmitStr);
+//          ++swRequest;
+//        }
+//        break;
+//      case 0x03://Calc. CRC
+//          jTransmit(&jTransmitStr, RxBuf);
+//          swRequest = 0x00;
+//        break;
+//      }
+//      asm("rim");
+//    }
     }
   }
 }
@@ -104,7 +104,8 @@ void assert_failed(u8 *file, u32 line)
 //For print info message
 static inline void PrintHelp(void)
 {
-  SendArray((uint8_t *)"For transmit data send packet J1708 with structure MID + Size + Data + priority. CRC calculate software\n\r", 106);
+  SendArray((uint8_t *)"J1708 Receiver. Only listen J1708, transmit isn't supported\n\r", 61);
+  SendArray((uint8_t*) "Send 0xFF to show invalid CRC packets\n\r", 39);
 }
 //For send array of data to soft uart
 static inline void SendArray(uint8_t *pData, uint8_t Size)
